@@ -1,5 +1,5 @@
 import { differenceInSeconds, isBefore, isSameDay, subDays } from 'date-fns'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { create } from 'zustand'
 import { combine, persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/shallow'
@@ -218,13 +218,27 @@ const TrppleClickDiv = ({
   ...props
 }: { children: React.ReactNode; onTripleClick: () => void } & React.HTMLAttributes<HTMLDivElement>) => {
   const [count, setCount] = useState(0)
+
   const handleClick = useCallback(() => {
     const nextCount = count + 1
     setCount(nextCount)
-    if (nextCount === 3) {
+    if (nextCount >= 3) {
       onTripleClick()
     }
   }, [count, onTripleClick])
+
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.addEventListener('click', handleClick)
+    }
+    return () => {
+      if (ref.current) {
+        ref.current.removeEventListener('click', handleClick)
+      }
+    }
+  }, [handleClick])
 
   // useEffect(() => {
   //   setCount(0)
@@ -238,7 +252,7 @@ const TrppleClickDiv = ({
   // }, [count])
 
   return (
-    <div onClick={handleClick} {...props}>
+    <div ref={ref} {...props}>
       {children}
     </div>
   )

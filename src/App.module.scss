@@ -20,6 +20,10 @@ body {
   }
 }
 
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 #root {
   min-height: 100%;
   height: 100%;
