@@ -78,17 +78,22 @@ const getDurationSByDurationString = (durationString: string): number => {
   if (parts.some(isNaN)) {
     throw new Error('Invalid duration string')
   }
+  const isNegative = durationString.startsWith('-')
+  if (isNegative) {
+    parts[0] = -parts[0]
+  }
+  const negativeMultiplier = isNegative ? -1 : 1
   if (parts.length === 3) {
     // HH:MM:SS
     const [hours, minutes, seconds] = parts
-    return hours * 3600 + minutes * 60 + seconds
+    return negativeMultiplier * (hours * 3600 + minutes * 60 + seconds)
   } else if (parts.length === 2) {
     // MM:SS
     const [minutes, seconds] = parts
-    return minutes * 60 + seconds
+    return negativeMultiplier * (minutes * 60 + seconds)
   } else if (parts.length === 1) {
     // SS
-    return parts[0]
+    return negativeMultiplier * parts[0]
   } else {
     throw new Error('Invalid duration string format')
   }
