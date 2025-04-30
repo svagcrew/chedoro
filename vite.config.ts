@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
     ],
     base,
     server: {
+      port: 4423,
       host: true,
     },
   }

@@ -123,8 +123,12 @@ body {
 
     .currentDuration {
       // font-size: 3.56rem;
-      font-size: 6rem;
+      font-size: 8rem;
       font-weight: 600;
+
+      @media (max-width: 48rem) {
+        font-size: 5rem;
+      }
 
       @media (max-width: 21rem) {
         font-size: 4rem;
