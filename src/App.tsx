@@ -1,5 +1,5 @@
 import { differenceInSeconds, isBefore, isSameDay, subDays } from 'date-fns'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { create } from 'zustand'
 import { combine, persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/shallow'
@@ -31,10 +31,10 @@ const getInitialState = (): Store => {
   return {
     statuses: [
       {
-        type: 'nothing',
-        name: '❌',
-        backgroundColor: '#bcbcbc',
-        textColor: '#434343',
+        type: 'something',
+        name: '🧠',
+        backgroundColor: '#ffeefa',
+        textColor: '#a58989',
       },
       {
         type: 'something',
@@ -44,9 +44,15 @@ const getInitialState = (): Store => {
       },
       {
         type: 'something',
-        name: '😴',
+        name: '😊',
         backgroundColor: '#ffffff',
         textColor: '#000000',
+      },
+      {
+        type: 'nothing',
+        name: '❌',
+        backgroundColor: '#e6e6e6',
+        textColor: '#434343',
       },
     ],
     records: [
@@ -128,7 +134,12 @@ const useStore = create(
         const today = new Date()
         const statuses = get().statuses
         const records = get().records
-        const stats: Array<TodayStat> = []
+        // const stats: Array<TodayStat> = []
+        const stats: Array<TodayStat> = statuses.map((status) => ({
+          statusName: status.name,
+          durationS: 0,
+          durationString: '',
+        }))
 
         for (const record of records) {
           const isToday =
@@ -192,6 +203,10 @@ const useStore = create(
         set({ statuses: getInitialState().statuses })
       }
 
+      const resetStore = () => {
+        set(getInitialState())
+      }
+
       return {
         getTodayStats,
         getCurrentRecord,
@@ -200,6 +215,7 @@ const useStore = create(
         start,
         resetStatuses,
         removeBadRecords,
+        resetStore,
       }
     }),
     {
@@ -212,47 +228,36 @@ const setCssVariable = (name: string, value: string) => {
   document.documentElement.style.setProperty(name, value)
 }
 
-const TrppleClickDiv = ({
+const ManyClickDiv = ({
+  desiredCount = 3,
   children,
-  onTripleClick,
+  onMultyClick,
   ...props
-}: { children: React.ReactNode; onTripleClick: () => void } & React.HTMLAttributes<HTMLDivElement>) => {
+}: {
+  desiredCount: number
+  children: React.ReactNode
+  onMultyClick: () => void
+} & React.HTMLAttributes<HTMLDivElement>) => {
   const [count, setCount] = useState(0)
 
   const handleClick = useCallback(() => {
     const nextCount = count + 1
     setCount(nextCount)
-    if (nextCount >= 3) {
-      onTripleClick()
+    if (nextCount >= desiredCount) {
+      setCount(0)
+      onMultyClick()
     }
-  }, [count, onTripleClick])
-
-  const ref = useRef<HTMLDivElement>(null)
+  }, [count, onMultyClick, desiredCount])
 
   useEffect(() => {
-    if (ref.current) {
-      ref.current.addEventListener('click', handleClick)
-    }
-    return () => {
-      if (ref.current) {
-        ref.current.removeEventListener('click', handleClick)
-      }
-    }
-  }, [handleClick])
-
-  // useEffect(() => {
-  //   setCount(0)
-  // }, [onTripleClick])
-
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     setCount(0)
-  //   }, 1000)
-  //   return () => clearInterval(interval)
-  // }, [count])
+    const interval = setInterval(() => {
+      setCount(0)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [count])
 
   return (
-    <div ref={ref} {...props}>
+    <div {...props} onClick={handleClick}>
       {children}
     </div>
   )
@@ -270,7 +275,7 @@ const setMetaThemeColor = (color: string) => {
 
 function App() {
   const currentRecord = useStore(useShallow((state) => state.getCurrentRecord()))
-  const otherStatuses = useStore(useShallow((state) => state.getOtherStatuses()))
+  // const otherStatuses = useStore(useShallow((state) => state.getOtherStatuses()))
   const currentStatus = useStore(useShallow((state) => state.getCurrentStatus()))
   const [todayStats, setTodayStats] = useState<Array<TodayStat>>([])
   const currentStatusName = currentStatus.name
@@ -311,36 +316,73 @@ function App() {
 
   return (
     <div className={css.app}>
-      <div className={css.header}>
+      {/* <div className={css.header}>
         <div className={css.todayStats}>
           {todayStats.map((stat) => (
-            <div className={css.todayStat} key={stat.statusName}>
+            <div
+              className={css.todayStat}
+              key={stat.statusName}
+              onClick={() => {
+                useStore.getState().start(stat.statusName)
+                updateCurrentDurationString()
+              }}
+            >
               <div className={css.todayStatName}>{stat.statusName}</div>
               <div className={css.todayStatDuration}>{stat.durationString}</div>
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
       <div className={css.main}>
-        <TrppleClickDiv
-          onTripleClick={() => {
+        <ManyClickDiv
+          desiredCount={3}
+          onMultyClick={() => {
             window.location.reload()
           }}
           className={css.currentStatusName}
         >
           {currentStatusName}
-        </TrppleClickDiv>
-        <div className={css.currentDuration}>{currentDurationString}</div>
+        </ManyClickDiv>
+        <ManyClickDiv
+          desiredCount={7}
+          className={css.currentDuration}
+          onMultyClick={() => {
+            useStore.getState().resetStore()
+          }}
+        >
+          {currentDurationString}
+        </ManyClickDiv>
       </div>
       <div className={css.footer}>
-        <div className={css.statusesButtons}>
+        <div className={css.todayStats}>
+          {todayStats.map((stat) => (
+            <div
+              className={css.todayStat}
+              key={stat.statusName}
+              onClick={() => {
+                useStore.getState().start(stat.statusName)
+                updateCurrentDurationString()
+              }}
+            >
+              <div className={css.todayStatName}>{stat.statusName}</div>
+              <div className={css.todayStatDuration}>{stat.durationString}</div>
+            </div>
+          ))}
+        </div>
+        {/* <div className={css.statusesButtons}>
           {otherStatuses
             .filter((status) => status.name!)
             .map((status) => (
               <button
                 className={css.statusButton}
                 key={status.name}
-                style={{ backgroundColor: status.backgroundColor }}
+                style={{
+                  // backgroundColor: status.backgroundColor,
+                  // color: status.textColor,
+                  // backgroundColor: 'transparent',
+                  // borderColor: status.backgroundColor,
+                  borderColor: currentStatus.textColor,
+                }}
                 onClick={() => {
                   useStore.getState().start(status.name)
                   updateCurrentDurationString()
@@ -349,7 +391,7 @@ function App() {
                 {status.name}
               </button>
             ))}
-        </div>
+        </div> */}
       </div>
     </div>
   )

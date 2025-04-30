@@ -40,35 +40,73 @@ body {
   font-family: 'Courier Prime', monospace;
   font-weight: 400;
 
-  .header {
-    flex: 1 1 0;
-    padding: 1.4rem;
+  // .todayStats {
+  //   padding: 1.4rem 1.4rem 2rem;
+  //   display: flex;
+  //   // flex-flow: row nowrap;
+  //   flex-flow: row-reverse wrap;
+  //   align-items: flex-end;
+  //   justify-content: flex-end;
+  //   gap: 1.78rem;
+  //   // overflow-x: auto;
 
-    .todayStats {
+  //   .todayStat {
+  //     flex: 0 0 0;
+  //     display: flex;
+  //     flex-flow: row nowrap;
+  //     align-items: center;
+  //     justify-content: center;
+  //     gap: 0.33rem;
+
+  //     .todayStatName {
+  //       font-size: 1.1rem;
+  //     }
+
+  //     .todayStatDuration {
+  //       font-size: 1.1rem;
+  //       margin-bottom: 0.25rem;
+  //     }
+  //   }
+  // }
+
+  .todayStats {
+    padding: 1.4rem 3rem 2.2rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(1, auto); // or just let it auto-flow
+    gap: 1.78rem;
+
+    @media (max-width: 48rem) {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, auto);
+    }
+
+    @media (max-width: 24rem) {
+      grid-template-columns: repeat(1, 1fr);
+      grid-template-rows: repeat(2, auto);
+    }
+
+    .todayStat {
       display: flex;
       flex-flow: row nowrap;
-      align-items: flex-start;
-      justify-content: flex-start;
-      gap: 1.78rem;
+      align-items: center;
+      justify-content: center;
+      gap: 0.33rem;
+      cursor: pointer;
 
-      .todayStat {
-        flex: 0 0 0;
-        display: flex;
-        flex-flow: row nowrap;
-        align-items: center;
-        justify-content: center;
-        gap: 0.33rem;
+      .todayStatName {
+        font-size: 1.1rem;
+      }
 
-        .todayStatName {
-          font-size: 1.33rem;
-        }
-
-        .todayStatDuration {
-          font-size: 1.33rem;
-          margin-bottom: 0.11rem;
-        }
+      .todayStatDuration {
+        font-size: 1.3rem;
+        margin-bottom: 0.25rem;
       }
     }
+  }
+
+  .header {
+    flex: 1 1 0;
   }
 
   .main {
@@ -90,27 +128,36 @@ body {
 
   .footer {
     flex: 1 1 0;
+  }
 
-    .statusesButtons {
-      display: flex;
-      flex-flow: row nowrap;
-      gap: 0.56rem;
-      align-items: center;
-      // justify-content: flex-end;
-      justify-content: center;
-      padding: 1.8rem;
+  .statusesButtons {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 0.56rem;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 1.8rem 0;
+    overflow-x: auto;
 
-      .statusButton {
-        flex: 0 0 0;
-        // border: 3px solid #000;
-        border: none;
-        outline: none;
-        border-radius: 0.33rem;
-        // font-size: 2.67rem;
-        font-size: 2rem;
-        padding: 0.56rem 1.67rem;
-        cursor: pointer;
-      }
+    &::after,
+    &::before {
+      content: '';
+      flex: 1 1 100%; // same as your wrapper padding
+      min-width: 1.8rem;
+    }
+
+    .statusButton {
+      box-sizing: border-box;
+      flex: 0 0 0;
+      border: 2px solid #000;
+      // border: none;
+      outline: none;
+      background-color: transparent;
+      border-radius: 0.33rem;
+      // font-size: 2.67rem;
+      font-size: 2rem;
+      padding: 0.56rem 1.67rem;
+      cursor: pointer;
     }
   }
 }
