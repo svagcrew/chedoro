@@ -226,7 +226,7 @@ function App() {
   const currentRecord = useStore(useShallow((state) => state.getCurrentRecord()))
   const otherStatuses = useStore(useShallow((state) => state.getOtherStatuses()))
   const currentStatus = useStore(useShallow((state) => state.getCurrentStatus()))
-  const [todayStats, setTodayStats] = useState<Array<{ statusName: string; durationS: number }>>([])
+  const [todayStats, setTodayStats] = useState<Array<TodayStat>>([])
   const currentStatusName = currentStatus.name
   const currentRecordStartedAt = currentRecord.startedAt
   const [currentDurationString, setCurrentDurationString] = useState('')
