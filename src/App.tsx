@@ -1,4 +1,4 @@
-import { differenceInSeconds, isAfter, isSameDay, subDays } from 'date-fns'
+import { differenceInSeconds, isBefore, isSameDay, subDays } from 'date-fns'
 import { useEffect, useState } from 'react'
 import { create } from 'zustand'
 import { combine, persist } from 'zustand/middleware'
@@ -68,9 +68,13 @@ const getRecordDurationS = (record: Record) => {
 }
 
 const getRecordDurationStringByDurationS = (durationS: number) => {
-  const minutes = Math.floor(durationS / 60)
+  const hours = Math.floor(durationS / 3600)
+  const minutes = Math.floor(durationS / 60) % 60
   const seconds = durationS % 60
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+  const pad = (value: number) => value.toString().padStart(2, '0')
+  const hoursString = hours > 0 ? `${hours}:` : ''
+  const minuteString = hours > 0 ? `${pad(minutes)}:` : `${minutes}:`
+  return `${hoursString}${minuteString}${pad(seconds)}`
 }
 
 const useStore = create(
@@ -117,6 +121,7 @@ const useStore = create(
         }
         const nextRecords = [nextRecord, updatedCurrentRecord, ...restRecords]
         set({ records: nextRecords })
+        removeBadRecords()
       }
 
       const getTodayStats = () => {
@@ -164,12 +169,23 @@ const useStore = create(
 
       const removeBadRecords = () => {
         const tooOldDate = subDays(new Date(), 30)
-        const tooShortDurationS = 60
-        const records = get().records.filter((record) => {
-          const durationsS = getRecordDurationS(record)
-          return isAfter(record.startedAt, tooOldDate) && durationsS > tooShortDurationS
+        const tooShortDurationS = 3
+        const isBadRecord = (record: Record) => {
+          if (!record.finishedAt) {
+            return false
+          }
+          const durationS = getRecordDurationS(record)
+          const isTooShort = durationS < tooShortDurationS
+          if (isTooShort) {
+            return true
+          }
+          const isTooOld = isBefore(record.finishedAt, tooOldDate)
+          return isTooOld
+        }
+        const goodRecords = get().records.filter((record) => {
+          return !isBadRecord(record)
         })
-        set({ records })
+        set({ records: goodRecords })
       }
 
       const resetStatuses = () => {
@@ -235,15 +251,6 @@ function App() {
     updateTodayStats()
     return () => clearInterval(interval)
   }, [currentRecordStartedAt])
-
-  useEffect(() => {
-    const removeBadRecords = useStore.getState().removeBadRecords
-    removeBadRecords()
-    const interval = setInterval(() => {
-      removeBadRecords()
-    }, 1000 * 60)
-    return () => clearInterval(interval)
-  }, [])
 
   return (
     <div className={css.app}>
