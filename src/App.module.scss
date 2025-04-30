@@ -13,6 +13,7 @@ body {
   background-color: var(--main-background-color);
   color: var(--main-text-color);
   font-size: 18px;
+  user-select: none;
 
   @media (max-width: 48rem) {
     font-size: 14px;

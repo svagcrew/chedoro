@@ -1,5 +1,5 @@
 import { differenceInSeconds, isBefore, isSameDay, subDays } from 'date-fns'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { create } from 'zustand'
 import { combine, persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/shallow'
@@ -212,6 +212,38 @@ const setCssVariable = (name: string, value: string) => {
   document.documentElement.style.setProperty(name, value)
 }
 
+const TrppleClickDiv = ({
+  children,
+  onTripleClick,
+  ...props
+}: { children: React.ReactNode; onTripleClick: () => void } & React.HTMLAttributes<HTMLDivElement>) => {
+  const [count, setCount] = useState(0)
+  const handleClick = useCallback(() => {
+    const nextCount = count + 1
+    setCount(nextCount)
+    if (nextCount === 3) {
+      onTripleClick()
+    }
+  }, [count, onTripleClick])
+
+  useEffect(() => {
+    setCount(0)
+  }, [onTripleClick])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCount(0)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [count])
+
+  return (
+    <div onClick={handleClick} {...props}>
+      {children}
+    </div>
+  )
+}
+
 const setMetaThemeColor = (color: string) => {
   let meta = document.querySelector('meta[name=theme-color]')
   if (!meta) {
@@ -276,7 +308,14 @@ function App() {
         </div>
       </div>
       <div className={css.main}>
-        <div className={css.currentStatusName}>{currentStatusName}</div>
+        <TrppleClickDiv
+          onTripleClick={() => {
+            window.location.reload()
+          }}
+          className={css.currentStatusName}
+        >
+          {currentStatusName}
+        </TrppleClickDiv>
         <div className={css.currentDuration}>{currentDurationString}</div>
       </div>
       <div className={css.footer}>
