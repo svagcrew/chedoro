@@ -51,7 +51,7 @@ const getInitialState = (): Store => {
     ],
     records: [
       {
-        statusName: '💤',
+        statusName: '❌',
         startedAt: new Date(),
         finishedAt: null,
       },
