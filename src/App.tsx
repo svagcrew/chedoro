@@ -226,16 +226,16 @@ const TrppleClickDiv = ({
     }
   }, [count, onTripleClick])
 
-  useEffect(() => {
-    setCount(0)
-  }, [onTripleClick])
+  // useEffect(() => {
+  //   setCount(0)
+  // }, [onTripleClick])
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCount(0)
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [count])
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setCount(0)
+  //   }, 1000)
+  //   return () => clearInterval(interval)
+  // }, [count])
 
   return (
     <div onClick={handleClick} {...props}>
