@@ -81,7 +81,7 @@ body {
       grid-template-rows: repeat(2, auto);
     }
 
-    @media (max-width: 24rem) {
+    @media (max-width: 18rem) {
       grid-template-columns: repeat(1, 1fr);
       grid-template-rows: repeat(2, auto);
     }
@@ -115,14 +115,20 @@ body {
     flex-flow: column nowrap;
     align-items: center;
     justify-content: center;
+    gap: 0.6rem;
 
     .currentStatusName {
       font-size: 7.11rem;
     }
 
     .currentDuration {
-      font-size: 3.56rem;
+      // font-size: 3.56rem;
+      font-size: 6rem;
       font-weight: 600;
+
+      @media (max-width: 21rem) {
+        font-size: 4rem;
+      }
     }
   }
 
