@@ -1,4 +1,4 @@
-import { differenceInSeconds, isBefore, isSameDay, subDays, subSeconds } from 'date-fns'
+import { addSeconds, differenceInSeconds, isBefore, isSameDay, subDays, subSeconds } from 'date-fns'
 import { useCallback, useEffect, useState } from 'react'
 import { create } from 'zustand'
 import { combine, persist } from 'zustand/middleware'
@@ -100,13 +100,15 @@ const getDurationSByDurationString = (durationString: string): number => {
 }
 
 const getRecordDurationStringByDurationS = (durationS: number) => {
+  const isNegative = durationS < 0
+  durationS = Math.abs(durationS)
   const hours = Math.floor(durationS / 3600)
   const minutes = Math.floor(durationS / 60) % 60
   const seconds = durationS % 60
   const pad = (value: number) => value.toString().padStart(2, '0')
   const hoursString = hours > 0 ? `${hours}:` : ''
   const minuteString = hours > 0 ? `${pad(minutes)}:` : `${minutes}:`
-  return `${hoursString}${minuteString}${pad(seconds)}`
+  return `${isNegative ? '-' : ''}${hoursString}${minuteString}${pad(seconds)}`
 }
 
 const useStore = create(
@@ -121,12 +123,11 @@ const useStore = create(
       }
 
       const updateCurrentRecordStartedAtByDurationS = (newDurationS: number) => {
+        console.log({ newDurationS })
         const currentRecord = getCurrentRecord()
-        const currentDurationsS = getRecordDurationS(currentRecord)
-        const diffS = newDurationS - currentDurationsS
         const updatedCurrentRecord = {
           ...currentRecord,
-          startedAt: subSeconds(currentRecord.startedAt, diffS),
+          startedAt: subSeconds(new Date(), newDurationS),
         }
         set({ records: [updatedCurrentRecord, ...get().records.slice(1)] })
       }
