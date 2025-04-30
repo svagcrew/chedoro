@@ -1,4 +1,4 @@
-import { differenceInSeconds, isBefore, isSameDay, subDays } from 'date-fns'
+import { differenceInSeconds, isBefore, isSameDay, subDays, subSeconds } from 'date-fns'
 import { useCallback, useEffect, useState } from 'react'
 import { create } from 'zustand'
 import { combine, persist } from 'zustand/middleware'
@@ -73,6 +73,27 @@ const getRecordDurationS = (record: Record) => {
   return differenceInSeconds(finishedAt, record.startedAt)
 }
 
+const getDurationSByDurationString = (durationString: string): number => {
+  const parts = durationString.split(':').map(Number)
+  if (parts.some(isNaN)) {
+    throw new Error('Invalid duration string')
+  }
+  if (parts.length === 3) {
+    // HH:MM:SS
+    const [hours, minutes, seconds] = parts
+    return hours * 3600 + minutes * 60 + seconds
+  } else if (parts.length === 2) {
+    // MM:SS
+    const [minutes, seconds] = parts
+    return minutes * 60 + seconds
+  } else if (parts.length === 1) {
+    // SS
+    return parts[0]
+  } else {
+    throw new Error('Invalid duration string format')
+  }
+}
+
 const getRecordDurationStringByDurationS = (durationS: number) => {
   const hours = Math.floor(durationS / 3600)
   const minutes = Math.floor(durationS / 60) % 60
@@ -92,6 +113,17 @@ const useStore = create(
           throw new Error('No current record found')
         }
         return currentRecord
+      }
+
+      const updateCurrentRecordStartedAtByDurationS = (newDurationS: number) => {
+        const currentRecord = getCurrentRecord()
+        const currentDurationsS = getRecordDurationS(currentRecord)
+        const diffS = newDurationS - currentDurationsS
+        const updatedCurrentRecord = {
+          ...currentRecord,
+          startedAt: subSeconds(currentRecord.startedAt, diffS),
+        }
+        set({ records: [updatedCurrentRecord, ...get().records.slice(1)] })
       }
 
       const getCurrentStatus = () => {
@@ -210,6 +242,7 @@ const useStore = create(
       return {
         getTodayStats,
         getCurrentRecord,
+        updateCurrentRecordStartedAtByDurationS,
         getCurrentStatus,
         getOtherStatuses,
         start,
@@ -232,22 +265,25 @@ const ManyClickDiv = ({
   desiredCount = 3,
   children,
   onMultyClick,
+  onClick,
   ...props
 }: {
   desiredCount: number
   children: React.ReactNode
   onMultyClick: () => void
+  onClick?: () => void
 } & React.HTMLAttributes<HTMLDivElement>) => {
   const [count, setCount] = useState(0)
 
   const handleClick = useCallback(() => {
+    onClick?.()
     const nextCount = count + 1
     setCount(nextCount)
     if (nextCount >= desiredCount) {
       setCount(0)
       onMultyClick()
     }
-  }, [count, onMultyClick, desiredCount])
+  }, [count, onMultyClick, desiredCount, onClick])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -277,6 +313,7 @@ function App() {
   const currentRecord = useStore(useShallow((state) => state.getCurrentRecord()))
   // const otherStatuses = useStore(useShallow((state) => state.getOtherStatuses()))
   const currentStatus = useStore(useShallow((state) => state.getCurrentStatus()))
+  const updateCurrentRecordStartedAtByDurationS = useStore((state) => state.updateCurrentRecordStartedAtByDurationS)
   const [todayStats, setTodayStats] = useState<Array<TodayStat>>([])
   const currentStatusName = currentStatus.name
   const currentRecordStartedAt = currentRecord.startedAt
@@ -346,6 +383,15 @@ function App() {
         <ManyClickDiv
           desiredCount={7}
           className={css.currentDuration}
+          onClick={() => {
+            const newDurationString = prompt('Enter new duration', currentDurationString)
+            if (!newDurationString) {
+              return
+            }
+            const newDurationS = getDurationSByDurationString(newDurationString)
+            updateCurrentRecordStartedAtByDurationS(newDurationS)
+            updateCurrentDurationString()
+          }}
           onMultyClick={() => {
             useStore.getState().resetStore()
           }}
