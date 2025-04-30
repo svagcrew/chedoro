@@ -218,7 +218,7 @@ const useStore = create(
             return false
           }
           const durationS = getRecordDurationS(record)
-          const isTooShort = durationS < tooShortDurationS
+          const isTooShort = Math.abs(durationS) < tooShortDurationS
           if (isTooShort) {
             return true
           }
