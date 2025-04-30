@@ -212,6 +212,16 @@ const setCssVariable = (name: string, value: string) => {
   document.documentElement.style.setProperty(name, value)
 }
 
+const setMetaThemeColor = (color: string) => {
+  let meta = document.querySelector('meta[name=theme-color]')
+  if (!meta) {
+    meta = document.createElement('meta')
+    meta.setAttribute('name', 'theme-color')
+    document.head.appendChild(meta)
+  }
+  meta.setAttribute('content', color)
+}
+
 function App() {
   const currentRecord = useStore(useShallow((state) => state.getCurrentRecord()))
   const otherStatuses = useStore(useShallow((state) => state.getOtherStatuses()))
@@ -228,6 +238,7 @@ function App() {
   useEffect(() => {
     setCssVariable('--main-background-color', currentStatus.backgroundColor)
     setCssVariable('--main-text-color', currentStatus.textColor)
+    setMetaThemeColor(currentStatus.backgroundColor)
   }, [currentStatus.backgroundColor, currentStatus.textColor])
 
   const updateCurrentDurationString = () => {
