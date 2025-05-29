@@ -44,6 +44,12 @@ const getInitialState = (): Store => {
       },
       {
         type: 'something',
+        name: '🌀',
+        backgroundColor: '#e1eaff',
+        textColor: '#2b4683',
+      },
+      {
+        type: 'something',
         name: '😊',
         backgroundColor: '#ffffff',
         textColor: '#000000',
