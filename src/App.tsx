@@ -1,4 +1,4 @@
-import { differenceInSeconds, isBefore, isSameDay, subDays, subSeconds } from 'date-fns'
+import { differenceInSeconds, endOfDay, isBefore, isSameDay, startOfDay, subDays, subSeconds } from 'date-fns'
 import { useCallback, useEffect, useState } from 'react'
 import { create } from 'zustand'
 import { combine, persist } from 'zustand/middleware'
@@ -44,6 +44,12 @@ const getInitialState = (): Store => {
       },
       {
         type: 'something',
+        name: '🤑',
+        backgroundColor: '#146318',
+        textColor: '#effff0',
+      },
+      {
+        type: 'something',
         name: '🌀',
         backgroundColor: '#e1eaff',
         textColor: '#2b4683',
@@ -77,6 +83,23 @@ const getRecordDurationS = (record: Record) => {
   }
   const finishedAt = record.finishedAt || new Date()
   return differenceInSeconds(finishedAt, record.startedAt)
+}
+
+const getRecordDurationSByDate = (record: Record, date?: Date) => {
+  date = date || new Date()
+  const dayStart = startOfDay(date)
+  const dayEnd = endOfDay(date)
+  const finishedAt = record.finishedAt || new Date()
+  const startedAt = record.startedAt
+  const isFinishedAtInDay = isSameDay(finishedAt, date)
+  const isStartedAtInDay = isSameDay(startedAt, date)
+  if (isFinishedAtInDay && isStartedAtInDay) {
+    return getRecordDurationS(record)
+  }
+  const finishedAtInDay = isFinishedAtInDay ? finishedAt : dayEnd
+  const startedAtInDay = isStartedAtInDay ? startedAt : dayStart
+  const durationS = differenceInSeconds(finishedAtInDay, startedAtInDay)
+  return durationS
 }
 
 const getDurationSByDurationString = (durationString: string): number => {
@@ -198,7 +221,7 @@ const useStore = create(
             // const isNotNothing = status && status.type !== 'nothing'
             const isNotNothing = !!status
             if (isNotNothing) {
-              const durationS = getRecordDurationS(record)
+              const durationS = getRecordDurationSByDate(record, today)
               stats.push({
                 statusName: record.statusName,
                 durationS,
@@ -206,7 +229,7 @@ const useStore = create(
               })
             }
           } else {
-            stat.durationS += getRecordDurationS(record)
+            stat.durationS += getRecordDurationSByDate(record, today)
           }
         }
 
